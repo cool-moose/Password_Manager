@@ -1,0 +1,135 @@
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+
+export interface PasswordEntry {
+  id: string;
+  site: string;
+  username: string;
+  password: string;
+  note: string;
+  category: string;
+  favorite: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface VaultContextType {
+  passwords: PasswordEntry[];
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+  addPassword: (entry: Omit<PasswordEntry, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updatePassword: (id: string, entry: Partial<PasswordEntry>) => void;
+  deletePassword: (id: string) => void;
+  toggleFavorite: (id: string) => void;
+  filteredPasswords: PasswordEntry[];
+  categories: string[];
+  selectedCategory: string | null;
+  setSelectedCategory: (category: string | null) => void;
+  loading: boolean;        // nowy stan
+  error: string | null;    // opcjonalnie: obsługa błędów
+}
+
+const VaultContext = createContext<VaultContextType | undefined>(undefined);
+
+export const VaultProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [passwords, setPasswords] = useState<PasswordEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  // Ładowanie danych z Electrona przy montowaniu
+  useEffect(() => {
+    const loadVaultData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+
+        const data: PasswordEntry[] = await window.electronAPI.getvaultdata();
+
+        
+        // Opcjonalnie: fallback na puste dane jeśli null/undefined
+        setPasswords(Array.isArray(data) ? data : []);
+      } catch (err: any) {
+        console.error('Failed to load vault data:', err);
+        setError(err.message || 'Failed to load passwords');
+        setPasswords([]); // fallback na pustą listę
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadVaultData();
+  }, []);
+
+  const categories = [...new Set(passwords.map(p => p.category))];
+
+  const filteredPasswords = passwords.filter(p => {
+    const matchesSearch = searchQuery === '' || 
+      p.site.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.note.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesCategory = selectedCategory === null || p.category === selectedCategory;
+    
+    return matchesSearch && matchesCategory;
+  });
+
+  const addPassword = (entry: Omit<PasswordEntry, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const newEntry: PasswordEntry = {
+      ...entry,
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    setPasswords(prev => [newEntry, ...prev]);
+  };
+
+  const updatePassword = (id: string, data: Partial<PasswordEntry>) => {
+    setPasswords(prev => prev.map(p => 
+      p.id === id 
+        ? { ...p, ...data, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  };
+
+  const deletePassword = (id: string) => {
+    setPasswords(prev => prev.filter(p => p.id !== id));
+  };
+
+  const toggleFavorite = (id: string) => {
+    setPasswords(prev => prev.map(p =>
+      p.id === id ? { ...p, favorite: !p.favorite } : p
+    ));
+  };
+
+  return (
+    <VaultContext.Provider value={{
+      passwords,
+      searchQuery,
+      setSearchQuery,
+      addPassword,
+      updatePassword,
+      deletePassword,
+      toggleFavorite,
+      filteredPasswords,
+      categories,
+      selectedCategory,
+      setSelectedCategory,
+      loading,
+      error
+    }}>
+      {children}
+    </VaultContext.Provider>
+  );
+};
+
+export const useVault = () => {
+  const context = useContext(VaultContext);
+
+  if (context === undefined) {
+    throw new Error('useVault must be used within a VaultProvider');
+  }
+  return context;
+};

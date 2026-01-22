@@ -1,0 +1,20 @@
+{
+  "name": "password-manager-monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev -w @password-manager/server\" \"npm run dev -w @password-manager/client\"",
+    "build": "npm run build --workspaces",
+    "romek": "npm run dev -w @password-manager/server & npm run dev -w @password-manager/client"
+  },
+  "devDependencies": {
+    "concurrently": "latest"
+  },
+  "dependencies": {
+    "@types/node-fetch": "^2.6.13",
+    "node-fetch": "^3.3.2",
+    "ts-node": "^10.9.2"
+  }
+}
