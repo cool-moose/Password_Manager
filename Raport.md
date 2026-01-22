@@ -11,6 +11,8 @@
 
 **Status:** Projekt ukończony i funkcjonalny
 
+**Repozytorium:** [Github](https://github.com/cool-moose/Password_Manager)
+
 ---
 
 ## 2. Harmonogram i Realizacja
