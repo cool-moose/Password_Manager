@@ -7,7 +7,7 @@
 - Hubert Czernicki (AES-256-GCM)
 - Tomasz Woś (PBKDF2-HMAC-SHA256)
 
-**Okres realizacji:** Grudzień 2024 - Styczeń 2025
+**Okres realizacji:** Grudzień 2025 - Styczeń 2026
 
 **Status:** Projekt ukończony i funkcjonalny
 
@@ -219,6 +219,7 @@
 - Backup Master Password
 - Migracja na SQLite (serwer)
 - Vector Clocks dla zaawansowanej synchronizacji
+- Implementacja SHA-256 z wykorzystaniem Intel SHA Extensions
 
 ---
 
@@ -226,6 +227,6 @@
 
 Projekt Password Manager został zrealizowany zgodnie z założeniami. Zespół skutecznie podzielił odpowiedzialności za komponenty kryptograficzne, co pozwoliło na równoległą pracę i głębokie zrozumienie każdego protokołu.
 
-Kluczowym sukcesem jest autorska implementacja wszystkich algorytmów kryptograficznych, co eliminuje zależności od zewnętrznych bibliotek i zwiększa audytowalność kodu. Chociaż implementacja w czystym TypeScript jest wolniejsza niż rozwiązania natywne (wyciek ~2.3s na 1MB), spełnia ona wymogi projektu dotyczące transparentności i braku zewnętrznych zależności krypto. Wykorzystanie Rust/WASM dla operacji SHA-256 zapewniło niezbędne wsparcie wydajnościowe tam, gdzie było to najbardziej potrzebne.
+Kluczowym sukcesem jest autorska implementacja wszystkich algorytmów kryptograficznych, co eliminuje zależności od zewnętrznych bibliotek i zwiększa audytowalność kodu. Chociaż implementacja w czystym TypeScript jest wolniejsza niż rozwiązania natywne (wyciek ~2.3s na 1MB), spełnia ona wymogi projektu dotyczące transparentności i braku zewnętrznych zależności krypto. Wykorzystanie Rust/WASM dla operacji SHA-256 zapewniło niezbędne wsparcie wydajnościowe tam, gdzie było to najbardziej potrzebne. Takie podejście pozwoliło na jak największe zbliżenie się do wydajności funkcji SHA-256 z bibiliotek, bez implementowania jej w Assembly z wykorzystaniem akceleracji sprzętowej (Intel SHA Extensions).
 
 Aplikacja jest w pełni funkcjonalna i gotowa do użycia, spełniając wszystkie założenia architektury Zero-Knowledge.
