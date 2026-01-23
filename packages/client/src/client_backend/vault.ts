@@ -89,7 +89,8 @@ export class Vault {
         }
         await this.createFromFile();
 
-        if(this.derivedKey != new Uint8Array()){
+        if(this.derivedKey.length === 0){
+            console.log(this.derivedKey)
             this.derivedKey = await deriveKey(this.salt, masterPassword, this.secretKey);
         }
 
